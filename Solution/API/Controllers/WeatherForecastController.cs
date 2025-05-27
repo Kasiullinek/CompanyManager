@@ -1,10 +1,11 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using SharedLibrary;
 
 namespace API.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase
     {
         private static readonly string[] Summaries = new[]
@@ -19,7 +20,7 @@ namespace API.Controllers
             _logger = logger;
         }
 
-        [HttpGet("Admin")]
+        [HttpGet("admin")]
         [Authorize(Roles = "Admin")]
         public IEnumerable<WeatherForecast> GetForecastByAdmin()
         {
@@ -32,7 +33,7 @@ namespace API.Controllers
             .ToArray();
         }
 
-        [HttpGet("User")]
+        [HttpGet("user")]
         [Authorize(Roles = "User")]
         public IEnumerable<WeatherForecast> GetForecastByUser()
         {

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.Net.Http.Headers;
 using Microsoft.OpenApi.Models;
 using SharedLibrary.Interfaces;
 using Swashbuckle.AspNetCore.Filters;
@@ -69,6 +70,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseCors(policy =>
+    {
+        policy.WithOrigins("http://localhost:7284", "https://localhost:7284")
+        .AllowAnyMethod()
+        .WithHeaders(HeaderNames.ContentType, "Authorization")
+        .AllowCredentials(); ;
+    });
 }
 
 app.UseHttpsRedirection();

@@ -1,0 +1,19 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+
+<PageTitle>Home</PageTitle>
+
+<h1>Hello, world!</h1>
+
+<AuthorizeView>
+    <Authorized>
+        <h2>You are authenticated</h2>
+        <h2>Your role is: @context.User.Claims.FirstOrDefault(_=>_.Type == ClaimTypes.Role)</h2>
+    </Authorized>
+    <NotAuthorized>
+        <h2>You are not authorized</h2>
+    </NotAuthorized>
+</AuthorizeView>
+
+Welcome to your new app.
