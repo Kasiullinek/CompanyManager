@@ -9,14 +9,10 @@
     <main>
         <div class="top-row px-4">
             <AuthorizeView Roles="Admin">
-                <Authorized Context="auth">
-                    <p class="my-3 me-3">Hello, Admin!</p>
-                </Authorized>
+                <p class="my-3 me-3">Hello, Admin!</p>
             </AuthorizeView>
             <AuthorizeView Roles="User">
-                <Authorized Context="auth">
-                    <p class="my-3 me-3">Hello, @auth.User.Identity.Name!</p>
-                </Authorized>
+                <p class="my-3 me-3">Hello, @context.User.Identity.Name!</p>
             </AuthorizeView>
 
             <AuthorizeView Roles="Admin,User">
@@ -24,7 +20,7 @@
                     <button class="btn btn-primary" @onclick="Logout">Logout</button>
                 </Authorized>
                 <NotAuthorized>
-                    <button class="btn btn-primary" @onclick="Login">Login</button>
+                    <button class="btn btn-primary me-2" @onclick="Login">Login</button>
                     <button class="btn btn-primary" @onclick="Register">Register</button>
                 </NotAuthorized>
             </AuthorizeView>

@@ -66,7 +66,6 @@
     {
         errors.Clear();
 
-        // Walidacja Frontendowa
         if (string.IsNullOrWhiteSpace(User.Email))
         {
             errors.Add("Email is Required!");
@@ -92,7 +91,6 @@
             return;
         }
 
-        // Walidacja Backendowa
         var (flag, message) = await AccountService.CreateAccount(User);
         if (flag)
         {

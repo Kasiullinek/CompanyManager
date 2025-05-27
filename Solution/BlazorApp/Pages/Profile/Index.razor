@@ -1,0 +1,45 @@
+﻿@page "/profile"
+@using SharedLibrary.Interfaces
+@using SharedLibrary.Dtos
+
+
+<h1 class="text-center mb-3">Profile</h1>
+
+@if (user == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="card p-3">
+        <p><strong>Id:</strong> @user.Id</p>
+        <p><strong>Email:</strong> @user.Email</p>
+        <p><strong>User Name:</strong> @user.UserName</p>
+        <p><strong>Role:</strong> @user.Role</p>
+    </div>
+    <div class="mt-2">
+        <button class="btn btn-primary" @onclick="Edit">Edit</button>
+        <button class="btn btn-danger" @onclick="Delete">Delete</button>
+    </div>
+}
+
+@inject IUserAccount AccountService
+@inject NavigationManager navManager;
+
+@code {
+    private UserDto? user;
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await AccountService.GetUserInfo();
+    }
+
+    private void Edit()
+    {
+        navManager.NavigateTo("/edit");
+    }
+    private void Delete()
+    {
+        navManager.NavigateTo("/delete");
+    }
+}

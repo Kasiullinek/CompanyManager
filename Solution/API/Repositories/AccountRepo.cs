@@ -6,11 +6,14 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using SharedLibrary.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace API.Repositories
 {
-    public class AccountRepo(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config) : IUserAccount
+    public class AccountRepo(UserManager<IdentityUser> userManager, RoleManager<IdentityRole> roleManager, IConfiguration config, IHttpContextAccessor httpContextAccessor) : IUserAccount
     {
+        private readonly IHttpContextAccessor _httpContextAccessor = httpContextAccessor;
+
         public async Task<GeneralResponse> CreateAccount(RegisterDto registerDto)
         {
             if (registerDto is null)
@@ -106,5 +109,92 @@ namespace API.Repositories
                 );
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
+        public async Task<IEnumerable<UserDto>> GetAllUsers()
+        {
+            var users = await userManager.Users.ToListAsync();
+            var result = new List<UserDto>();
+
+            foreach (var user in users)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+                result.Add(new UserDto
+                {
+                    Id = user.Id,
+                    Email = user.Email!,
+                    UserName = user.UserName!,
+                    Role = roles.FirstOrDefault() ?? "No Role"
+                });
+            }
+
+            return result;
+        }
+
+        public async Task<UserDto> GetUserInfo()
+        {
+            var id = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await userManager.FindByIdAsync(id);
+            if (user is null)
+            {
+                return null!;
+            }
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            return new UserDto
+            {
+                Id = user.Id,
+                Email = user.Email!,
+                UserName = user.UserName!,
+                Role = roles.FirstOrDefault() ?? "No Role"
+            };
+        }
+
+        public async Task<GeneralResponse> DeleteAccount()
+        {
+            var id = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var user = await userManager.FindByIdAsync(id);
+            if (user is null)
+            {
+                return new GeneralResponse(false, "User not found.");
+            }
+                
+            var result = await userManager.DeleteAsync(user);
+
+            if (!result.Succeeded)
+            {
+                return new GeneralResponse(false, "Error deleting account.");
+            }
+
+            return new GeneralResponse(true, "Account deleted.");
+        }
+
+        public async Task<EditResponse> EditAccount(UserDto userDto)
+        {
+            var id = _httpContextAccessor.HttpContext?.User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userManager.FindByIdAsync(id);
+
+            if (user is null)
+            {
+                return new EditResponse(false, "", "User not found.");
+            }
+
+            user.UserName = userDto.UserName;
+
+            var updateResult = await userManager.UpdateAsync(user);
+            if (!updateResult.Succeeded)
+            {
+                return new EditResponse(false, "", "Failed to update user.");
+            }
+
+            var roles = await userManager.GetRolesAsync(user);
+            var userSession = new UserSession(user.Id, user.UserName, user.Email, roles.FirstOrDefault());
+            string newToken = GenerateToken(userSession);
+
+            return new EditResponse(true, newToken, "Profile updated successfully.");
+        }
+
     }
 }
