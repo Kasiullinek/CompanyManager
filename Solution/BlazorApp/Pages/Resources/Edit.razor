@@ -1,0 +1,113 @@
+﻿@page "/edit-resource/Id={Id}"
+@using SharedLibrary.Dtos
+@using SharedLibrary.Interfaces
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-5">Edit Resource</h1>
+        <hr>
+
+        @if (resource == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            @if (errors.Any())
+            {
+                <div class="alert alert-danger" role="alert">
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        @foreach (var error in errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="row-mb-3">
+                <label class="col-md-4 col-form-label">Name</label>
+                <div class="col-md-8">
+                    <input class="form-control" @bind=resource.Name />
+                </div>
+            </div>
+            <div class="row-mb-3">
+                <label class="col-md-4 col-form-label">Description</label>
+                <div class="col-md-8">
+                    <input class="form-control" @bind=resource.Description />
+                </div>
+            </div>
+            <div class="row-mb-3">
+                <label class="col-md-4 col-form-label">Assigned To Email</label>
+                <div class="col-md-8">
+                    <input type="email" class="form-control" @bind=resource.AssignedToEmail />
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="offset-md-4 col-md-4 d-grid">
+                    <button class="btn btn-primary" @onclick="EditResource">Submit</button>
+                </div>
+                <div class="col-md-4 d-grid">
+                    <a class="btn btn-outline-primary" href="/">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@inject IJSRuntime js
+@inject IResource ResourceService
+@inject NavigationManager Navigation
+@inject NavigationManager navManager
+
+@code {
+    [Parameter]
+    public string? Id { get; set; }
+    private ResourceDto? resource = null;
+    public List<string> errors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Id))
+        {
+            resource = await ResourceService.GetResource(Id);
+        }
+    }
+
+    private async Task EditResource()
+    {
+        errors.Clear();
+
+        if (string.IsNullOrWhiteSpace(resource.Name))
+        {
+            errors.Add("Name is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(resource.Description))
+        {
+            errors.Add("Description is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(resource.AssignedToEmail))
+        {
+            errors.Add("Email is Required!");
+        }
+
+        if (errors.Any())
+        {
+            return;
+        }
+
+        var (flag, message) = await ResourceService.EditResource(resource!);
+
+        if (flag)
+        {
+            navManager.NavigateTo("/");
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+
+    }
+}

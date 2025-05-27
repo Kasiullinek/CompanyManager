@@ -62,6 +62,7 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 builder.Services.AddScoped<IUserAccount, AccountRepo>();
+builder.Services.AddScoped<IResource, ResourceRepo>();
 
 builder.Services.AddHttpContextAccessor();
 

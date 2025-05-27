@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using SharedLibrary.Dtos;
 
 namespace API.Data
 {
@@ -10,5 +11,7 @@ namespace API.Data
         {
 
         }
+
+        public DbSet<Resource> Resources { get; set; }
     }
 }

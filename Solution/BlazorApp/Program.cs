@@ -17,5 +17,7 @@ builder.Services.AddAuthorizationCore();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<IUserAccount, AccountService>();
 builder.Services.AddScoped<IWeather, AccountService>();
+builder.Services.AddScoped<IResource, ResourceService>();
+
 
 await builder.Build().RunAsync();

@@ -1,4 +1,4 @@
-﻿@page "/edit"
+﻿@page "/edit-profile"
 @using Blazored.LocalStorage
 @using SharedLibrary.Dtos
 @using System.Text.Json.Nodes
@@ -30,7 +30,6 @@
                 <label class="col-md-4 col-form-label">User Name</label>
                 <div class="col-md-8">
                     <input class="form-control" @bind=user.UserName />
-                    <span class="text-danger">@Errors["UserName"]?[0]</span>
                 </div>
             </div>
             <div class="row">
@@ -52,7 +51,6 @@
     [Parameter]
     public int Id { set; get; }
     public UserDto? user = null;
-    public JsonNode Errors { set; get; } = new JsonObject();
     public List<string> errors = new();
 
     protected override async Task OnInitializedAsync()
@@ -84,8 +82,8 @@
             }
             navManager.NavigateTo("/profile");
         }
-        string customMessage = $"{message}";
-        await js.InvokeVoidAsync("alert", customMessage);
+
+        await js.InvokeVoidAsync("alert", message);
         return;
     }
 }
