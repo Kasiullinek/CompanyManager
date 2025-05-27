@@ -14,21 +14,25 @@ else
     <table class="table">
         <thead>
             <tr>
-                <th>Id</th>
+                <th>No.</th>
                 <th>Email</th>
                 <th>User Name</th>
                 <th>Role</th>
             </tr>
         </thead>
         <tbody>
+            @{
+                int counter = 1;
+            }
             @foreach (var user in users)
             {
                 <tr>
-                    <td>@user.Id</td>
+                    <td>@counter</td>
                     <td>@user.Email</td>
                     <td>@user.UserName</td>
                     <td>@user.Role</td>
                 </tr>
+                counter++;
             }
         </tbody>
     </table>

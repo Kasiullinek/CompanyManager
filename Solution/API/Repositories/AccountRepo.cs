@@ -168,7 +168,7 @@ namespace API.Repositories
                 return new GeneralResponse(false, "Error deleting account.");
             }
 
-            return new GeneralResponse(true, "Account deleted.");
+            return new GeneralResponse(true, "Account was deleted.");
         }
 
         public async Task<EditResponse> EditAccount(UserDto userDto)

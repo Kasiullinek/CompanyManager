@@ -1,0 +1,100 @@
+﻿@page "/create-resource"
+@using SharedLibrary.Dtos
+@using SharedLibrary.Dtos.GenericsModel
+@using SharedLibrary.Interfaces
+@using System.Text.Json.Nodes
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-5">New Resource</h1>
+        <hr>
+
+        @if (errors.Any())
+        {
+            <div class="alert alert-danger" role="alert">
+                <ul style="list-style-type: none; padding-left: 0;">
+                    @foreach (var error in errors)
+                    {
+                        <li>@error</li>
+                    }
+                </ul>
+            </div>
+        }
+
+        <div class="row-mb-3">
+            <label class="col-md-4 col-form-label">Name</label>
+            <div class="col-md-8">
+                <input class="form-control" @bind=newResource.Name />
+            </div>
+        </div>
+        <div class="row-mb-3">
+            <label class="col-md-4 col-form-label">Description</label>
+            <div class="col-md-8">
+                <input class="form-control" @bind=newResource.Description />
+            </div>
+        </div>
+        <div class="row-mb-3">
+            <label class="col-md-4 col-form-label">Assigned To Email</label>
+            <div class="col-md-8">
+                <input type="email" class="form-control" @bind=newResource.AssignedToEmail />
+            </div>
+        </div>
+
+        <div class="row mt-3">
+            <div class="offset-md-4 col-md-4 d-grid">
+                <button class="btn btn-primary" @onclick="CreateResource">Submit</button>
+            </div>
+            <div class="col-md-4 d-grid">
+                <a class="btn btn-outline-primary" href="/">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+@inject IResource ResourceService
+@inject NavigationManager navManager
+@inject NavigationManager Navigation
+@inject IJSRuntime js
+
+@code {
+    private ResourceDto newResource = new();
+    public List<string> errors = new();
+
+    private async Task CreateResource()
+    {
+        errors.Clear();
+
+        if (string.IsNullOrWhiteSpace(newResource.Name))
+        {
+            errors.Add("Name is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(newResource.Description))
+        {
+            errors.Add("Description is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(newResource.AssignedToEmail))
+        {
+            errors.Add("Email is Required!");
+        }
+
+        if (errors.Any())
+        {
+            return;
+        }
+
+        var (flag, message) = await ResourceService.AddResource(newResource);
+
+        if (flag)
+        {
+            newResource = new ResourceDto();
+            navManager.NavigateTo("/", forceLoad: true);
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+    }
+}
+
