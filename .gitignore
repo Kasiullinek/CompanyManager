@@ -1,0 +1,76 @@
+# Visual Studio
+.vs/
+*.user
+*.suo
+
+# Build output
+bin/
+obj/
+out/
+
+# NuGet packages
+*.nupkg
+*.snupkg
+packages/
+*.nuspec
+project.lock.json
+project.assets.json
+
+# Cache
+*.dbcache
+*.cache
+*.v8.bin
+*.nuget
+*.pidb
+*.svclog
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# ASP.NET Core secrets
+secrets.json
+*.sqlite
+
+# Logs
+*.log
+logs/
+log/
+
+# User-specific files
+*.userprefs
+
+# Resharper
+_ReSharper*/
+*.[Rr]e[Ss]harper
+*.DotSettings.user
+
+# dotCover
+*.dcvr
+
+# Coverage
+coverage/
+*.lcov
+
+# Web project artifacts (e.g. Blazor)
+wwwroot/dist/
+node_modules/
+*.map
+*.gz
+
+# Auto-generated files
+Generated/
+
+# Local config
+appsettings.Development.json
+appsettings.Local.json
+
+# Publish
+publish/
+*.publish.xml
+
+# Others
+*.tmp
+*.bak
+*.orig
+*.swp
