@@ -1,0 +1,91 @@
+﻿@page "/edit"
+@using Blazored.LocalStorage
+@using SharedLibrary.Dtos
+@using System.Text.Json.Nodes
+@using SharedLibrary.Interfaces
+
+<div class="row">
+    <div class="col-lg-8">
+        <h1 class="mb-5">Edit Profile</h1>
+
+        @if (user == null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            @if (errors.Any())
+            {
+                <div class="alert alert-danger" role="alert">
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        @foreach (var error in errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="row-mb-3">
+                <label class="col-md-4 col-form-label">User Name</label>
+                <div class="col-md-8">
+                    <input class="form-control" @bind=user.UserName />
+                    <span class="text-danger">@Errors["UserName"]?[0]</span>
+                </div>
+            </div>
+            <div class="row">
+                <div class="mt-2">
+                    <button class="btn btn-primary" @onclick="EditProfile">Submit</button>
+                    <a class="btn btn-outline-primary" href="/profile">Cancel</a>
+                </div>
+            </div>
+        }
+    </div>
+</div>
+
+@inject IUserAccount AccountService
+@inject IJSRuntime js
+@inject NavigationManager navManager
+@inject ILocalStorageService localStorage
+
+@code {
+    [Parameter]
+    public int Id { set; get; }
+    public UserDto? user = null;
+    public JsonNode Errors { set; get; } = new JsonObject();
+    public List<string> errors = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        user = await AccountService.GetUserInfo();
+    }
+
+    private async Task EditProfile()
+    {
+        errors.Clear();
+
+        if (string.IsNullOrWhiteSpace(user?.UserName))
+        {
+            errors.Add("User Name is Empty!");
+        }
+
+        if (errors.Any())
+        {
+            return;
+        }
+
+        var (flag, token ,message) = await AccountService.EditAccount(user!);
+
+        if (flag)
+        {
+            if (!string.IsNullOrWhiteSpace(token))
+            {
+                await localStorage.SetItemAsync("token", token);
+            }
+            navManager.NavigateTo("/profile");
+        }
+        string customMessage = $"{message}";
+        await js.InvokeVoidAsync("alert", customMessage);
+        return;
+    }
+}

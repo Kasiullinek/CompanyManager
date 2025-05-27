@@ -7,5 +7,10 @@ namespace SharedLibrary.Interfaces
     {
         Task<GeneralResponse> CreateAccount(RegisterDto registerDto);
         Task<LoginResponse> LoginAccount(LoginDto loginDto);
+        Task<IEnumerable<UserDto>> GetAllUsers();
+        Task<UserDto> GetUserInfo();
+        Task<GeneralResponse> DeleteAccount();
+        Task<EditResponse> EditAccount(UserDto userDto);
+
     }
 }

@@ -63,6 +63,8 @@ builder.Services.AddSwaggerGen(options =>
 
 builder.Services.AddScoped<IUserAccount, AccountRepo>();
 
+builder.Services.AddHttpContextAccessor();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -78,6 +80,7 @@ if (app.Environment.IsDevelopment())
         .AllowCredentials(); ;
     });
 }
+
 
 app.UseHttpsRedirection();
 
