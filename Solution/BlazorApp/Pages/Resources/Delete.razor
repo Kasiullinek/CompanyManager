@@ -1,0 +1,39 @@
+﻿@page "/delete-resource/Id={Id}"
+@using SharedLibrary.Interfaces
+@using SharedLibrary.Dtos
+
+<h1 class="mb-3">Delete Resource</h1>
+<p>Are you sure you want to delete task "@resource.Name"?</p>
+<button class="btn btn-danger" @onclick="DeleteResource">Delete</button>
+<a class="btn btn-secondary" href="/">Cancel</a>
+
+@inject NavigationManager navManager
+@inject IJSRuntime js
+@inject IResource ResourceService
+
+@code {
+    [Parameter]
+    public string? Id { set; get; }
+    private ResourceDto? resource = null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!string.IsNullOrEmpty(Id))
+        {
+            resource = await ResourceService.GetResource(Id);
+        }
+    }
+
+    private async Task DeleteResource()
+    {
+        var (flag, message) = await ResourceService.DeleteResource(Id);
+
+        if (flag)
+        {
+            navManager.NavigateTo("/", forceLoad: true);
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+    }
+}

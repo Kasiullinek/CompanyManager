@@ -1,0 +1,91 @@
+﻿@page "/login"
+@using SharedLibrary.Dtos
+@using SharedLibrary.Interfaces
+@using BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+
+<div class="mx-auto rounded border p-4" style="width: 400px;margin: 60px;">
+    <h3 class="text-center mb-3">Login</h3>
+    <hr>
+
+    @if (errors.Any())
+    {
+        <div class="alert alert-danger" role="alert">
+            <ul style="list-style-type: none; padding-left: 0;">
+                @foreach (var error in errors)
+                {
+                    <li>@error</li>
+                }
+            </ul>
+        </div>
+    }
+
+    <div class="mb-3">
+        <label class="form-label">Email</label>
+        <input class="form-control" @bind="User.Email">
+    </div>
+
+    <div class="mb-3">
+        <label class="form-label">Password</label>
+        <input class="form-control" type="password" @bind="User.Password">
+    </div>
+
+    <div class="row">
+        <div class="col d-grid">
+            <button class="btn btn-primary" @onclick="LoginAsync">Log in</button>
+        </div>
+        <div class="col d-grid">
+            <a class="btn btn-outline-primary" href="/" role="button">Cancel</a>
+        </div>
+    </div>
+
+</div>
+
+@inject AuthenticationStateProvider provider
+@inject NavigationManager navManager
+@inject IJSRuntime js
+@inject IUserAccount AccountService
+
+@code {
+    public LoginDto User { get; set; } = new();
+    public List<string> errors = new();
+
+    private async Task LoginAsync()
+    {
+        errors.Clear();
+
+        // Walidacja Frontendowa
+        if (string.IsNullOrWhiteSpace(User.Email))
+        {
+            errors.Add("Email is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(User.Password))
+        {
+            errors.Add("Password is Required!");
+        }
+
+        if (errors.Any())
+        {
+            return;
+        }
+
+        // Walidacja Backendowa
+        var (flag, token, message) = await AccountService.LoginAccount(User);
+
+        if (flag)
+        {
+            string customMessage = $"{message}";
+            await js.InvokeVoidAsync("alert", customMessage);
+            User = new();
+
+            var customAuthStateProvider = (CustomAuthStateProvider)provider;
+            await customAuthStateProvider.UpdateAuthenticationState(token);
+            navManager.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        errors.Add(message);
+        return;
+    }
+}

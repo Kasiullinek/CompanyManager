@@ -1,0 +1,106 @@
+﻿@page "/register"
+@using Microsoft.AspNetCore.Components.Authorization
+@using SharedLibrary.Dtos
+@using SharedLibrary.Interfaces
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xl-6 mx-auto rounded border p-4" style="margin: 60px">
+            <h3 class="text-center mb-3">Register</h3>
+            <hr>
+
+            @if (errors.Any())
+            {
+                <div class="alert alert-danger" role="alert">
+                    <ul style="list-style-type: none; padding-left: 0;">
+                        @foreach (var error in errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            <div class="row mb-3">
+                <label class="col-md-4 col-form-label">Email</label>
+                <div class="col-md-8">
+                    <input class="form-control" @bind="User.Email"></input>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-md-4 col-form-label">Password</label>
+                <div class="col-md-8">
+                    <input class="form-control" type="password" @bind="User.Password"></input>
+                </div>
+            </div>
+            <div class="row mb-3">
+                <label class="col-md-4 col-form-label">Confirm Password</label>
+                <div class="col-md-8">
+                    <input class="form-control" type="password" @bind="User.ConfirmPassword"></input>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="offset-md-4 col d-grid">
+                    <button class="btn btn-primary" @onclick="RegisterAsync">Register</button>
+                </div>
+                <div class="col d-grid">
+                    <a class="btn btn-outline-primary" href="/" role="button">Cancel</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+@inject AuthenticationStateProvider provider
+@inject NavigationManager navManager
+@inject IJSRuntime js
+@inject IUserAccount AccountService
+
+@code {
+    public RegisterDto User { get; set; } = new();
+    public List<string> errors = new();
+
+    private async Task RegisterAsync()
+    {
+        errors.Clear();
+
+        if (string.IsNullOrWhiteSpace(User.Email))
+        {
+            errors.Add("Email is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(User.Password))
+        {
+            errors.Add("Password is Required!");
+        }
+
+        if (string.IsNullOrWhiteSpace(User.ConfirmPassword))
+        {
+            errors.Add("Confirm Password is Required!");
+        }
+
+        if (User.Password != User.ConfirmPassword)
+        {
+            errors.Add("Password and ConfirmPassword do not match!");
+        }
+
+        if (errors.Any())
+        {
+            return;
+        }
+
+        var (flag, message) = await AccountService.CreateAccount(User);
+        if (flag)
+        {
+            await js.InvokeVoidAsync("alert", message);
+            User = new();
+            navManager.NavigateTo("/", forceLoad: true);
+            return;
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+    }
+}

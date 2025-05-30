@@ -1,0 +1,166 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.Components.Authorization
+@using System.Security.Claims
+@using SharedLibrary.Dtos
+@using SharedLibrary.Interfaces
+
+<PageTitle>Home</PageTitle>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <h1>Hello, world!</h1>
+
+        Welcome to Company Management App.
+    </NotAuthorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="Admin">
+    <Authorized>
+        <h1 class="text-center mb-3">List of All Resources</h1>
+        <button class="btn btn-primary mb-3" @onclick="Create">Add Resource</button>
+
+        @if (allResources is null)
+        {
+            <p><em>Loading...</em></p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Assigned To Email</th>
+                        <th>Is Completed</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int counter = 1;
+                    }
+                    @foreach (var resource in allResources)
+                    {
+                        <tr>
+                            <td>@counter</td>
+                            <td>@resource.Name</td>
+                            <td>@resource.Description</td>
+                            <td>@resource.AssignedToEmail</td>
+                            <td>
+                                @if (resource.IsCompleted)
+                                {
+                                    <span>Yes</span>
+                                }
+                                else
+                                {
+                                    <span>No</span>
+
+                                }
+                            </td>
+                            <td style="white-space:nowrap">
+                                <button class="btn btn-primary" @onclick="() => Edit(resource.Id)">Edit</button>
+                                <button class="btn btn-danger" @onclick="() => Delete(resource.Id)">Delete</button>
+                            </td>
+                        </tr>
+                        counter++;
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
+
+<AuthorizeView Roles="User">
+    <Authorized>
+        <h1 class="text-center mb-3">Your Assigned Resources</h1>
+
+        @if (userResources is null || !userResources.Any())
+        {
+            <p>No resources assigned to you.</p>
+        }
+        else
+        {
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>No.</th>
+                        <th>Name</th>
+                        <th>Description</th>
+                        <th>Is Completed</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @{
+                        int counter = 1;
+                    }
+                    @foreach (var res in userResources)
+                    {
+                        <tr>
+                            <td>@counter</td>
+                            <td>@res.Name</td>
+                            <td>@res.Description</td>
+                            <td>@(res.IsCompleted ? "Yes" : "No")</td>
+                            <td>
+                                <button class="btn btn-success btn-sm" @onclick="() => SetCompletionStatus(res, !res.IsCompleted)"> 
+                                    @(res.IsCompleted ? "Mark as Incompleted" : "Mark as Completed")
+                                </button>
+                            </td>
+                        </tr>
+                        counter++;
+                    }
+                </tbody>
+            </table>
+        }
+    </Authorized>
+</AuthorizeView>
+
+
+@inject IResource ResourceService
+@inject AuthenticationStateProvider AuthStateProvider
+@inject NavigationManager navManager;
+
+@code {
+    private List<ResourceDto>? allResources;
+    private List<ResourceDto>? userResources;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.IsInRole("Admin"))
+        {
+            allResources = (await ResourceService.GetAllResources()).ToList();
+        }
+        else if (user.IsInRole("User"))
+        {
+            userResources = (await ResourceService.GetUserResources()).ToList();
+        }
+    }
+
+    private async Task SetCompletionStatus(ResourceDto resource, bool isCompleted)
+    {
+        resource.IsCompleted = isCompleted;
+        var response = await ResourceService.EditResource(resource);
+
+        if (response.Flag)
+        {
+            userResources = (await ResourceService.GetUserResources()).ToList();
+            StateHasChanged();
+        }
+    }
+
+    private void Create()
+    {
+        navManager.NavigateTo("/create-resource");
+    }
+    private void Edit(string Id)
+    {
+        navManager.NavigateTo($"/edit-resource/id={Id}");
+    }
+    private void Delete(string Id)
+    {
+        navManager.NavigateTo($"/delete-resource/id={Id}");
+    }
+}

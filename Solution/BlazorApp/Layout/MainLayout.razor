@@ -1,0 +1,54 @@
+﻿@using BlazorApp.Services
+@using Microsoft.AspNetCore.Components.Authorization
+@inherits LayoutComponentBase
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <AuthorizeView Roles="Admin">
+                <p class="my-3 me-3">Hello, Admin!</p>
+            </AuthorizeView>
+            <AuthorizeView Roles="User">
+                <p class="my-3 me-3">Hello, @context.User.Identity.Name!</p>
+            </AuthorizeView>
+
+            <AuthorizeView Roles="Admin,User">
+                <Authorized>
+                    <button class="btn btn-primary" @onclick="Logout">Logout</button>
+                </Authorized>
+                <NotAuthorized>
+                    <button class="btn btn-primary me-2" @onclick="Login">Login</button>
+                    <button class="btn btn-primary" @onclick="Register">Register</button>
+                </NotAuthorized>
+            </AuthorizeView>
+        </div>
+
+        <article class="content px-4">
+            @Body
+        </article>
+    </main>
+</div>
+
+@inject AuthenticationStateProvider provider
+@inject NavigationManager navManager
+
+@code {
+    private async Task Logout()
+    {
+        var customAuthStateProvider = (CustomAuthStateProvider)provider;
+        await customAuthStateProvider.UpdateAuthenticationState(null!);
+        navManager.NavigateTo("/");
+    }
+    void Login()
+    {
+        navManager.NavigateTo("/login");
+    }
+    void Register()
+    {
+        navManager.NavigateTo("/register");
+    }
+}
+   

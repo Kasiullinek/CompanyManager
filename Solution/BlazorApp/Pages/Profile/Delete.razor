@@ -1,0 +1,32 @@
+﻿@page "/delete-profile"
+@using Blazored.LocalStorage
+@using SharedLibrary.Interfaces
+
+<h1 class="mb-3">Delete Task</h1>
+<p>Are you sure you want to delete your profile?</p>
+<button class="btn btn-danger" @onclick="DeleteProfile">Delete</button>
+<a class="btn btn-secondary" href="/profile">Cancel</a>
+
+@inject IUserAccount AccountService
+@inject NavigationManager navManager
+@inject IJSRuntime js
+@inject ILocalStorageService localStorage
+
+@code {
+    [Parameter]
+    public string? Id { set; get; }
+
+    private async Task DeleteProfile()
+    {
+        var (flag, message) = await AccountService.DeleteAccount();
+
+        if (flag)
+        {
+            await localStorage.RemoveItemAsync("token");
+            navManager.NavigateTo("/", forceLoad: true);
+        }
+
+        await js.InvokeVoidAsync("alert", message);
+        return;
+    }
+}
